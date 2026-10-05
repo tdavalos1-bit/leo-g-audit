@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leo G Audit — OAuth callback</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.4; }
+    code, pre { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 4px; word-break: break-all; }
+    pre { padding: 0.75rem; overflow-x: auto; }
+    button { margin-top: 0.5rem; padding: 0.5rem 1rem; cursor: pointer; }
+    .err { color: #a00; }
+    .ok { color: #060; }
+  </style>
+</head>
+<body>
+  <h1>Leo G Audit — QuickBooks OAuth</h1>
+  <p>Página de Redirect URI. Solo lectura del query string. No guarda ni envía secretos.</p>
+  <div id="out">Leyendo URL…</div>
+  <script>
+    (function () {
+      var p = new URLSearchParams(location.search);
+      var code = p.get("code");
+      var state = p.get("state");
+      var realmId = p.get("realmId");
+      var error = p.get("error");
+      var errorDesc = p.get("error_description");
+      var el = document.getElementById("out");
+      if (error) {
+        el.innerHTML = "<p class=\"err\"><strong>Error:</strong> " + error +
+          (errorDesc ? "<br>" + errorDesc : "") + "</p>";
+        return;
+      }
+      if (!code) {
+        el.innerHTML = "<p class=\"err\">No hay <code>code</code> en la URL. Cuando Intuit redirija aquí tras Connect, verás el código.</p>" +
+          "<p>URL actual:</p><pre>" + location.href + "</pre>";
+        return;
+      }
+      el.innerHTML =
+        "<p class=\"ok\"><strong>code</strong> (cópialo o copia la URL completa para Leo):</p>" +
+        "<pre id=\"code\">" + code + "</pre>" +
+        (state ? "<p><strong>state:</strong> <code>" + state + "</code></p>" : "") +
+        (realmId ? "<p><strong>realmId:</strong> <code>" + realmId + "</code></p>" : "") +
+        "<p><strong>URL completa:</strong></p><pre id=\"full\">" + location.href + "</pre>" +
+        "<button type=\"button\" id=\"copyCode\">Copiar code</button> " +
+        "<button type=\"button\" id=\"copyUrl\">Copiar URL completa</button>";
+      function copy(text, btn) {
+        navigator.clipboard.writeText(text).then(function () {
+          btn.textContent = "Copiado";
+          setTimeout(function () { btn.textContent = btn.dataset.label; }, 1500);
+        });
+      }
+      var b1 = document.getElementById("copyCode");
+      b1.dataset.label = "Copiar code";
+      b1.onclick = function () { copy(code, b1); };
+      var b2 = document.getElementById("copyUrl");
+      b2.dataset.label = "Copiar URL completa";
+      b2.onclick = function () { copy(location.href, b2); };
+    })();
+  </script>
+</body>
+</html>
